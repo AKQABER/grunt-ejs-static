@@ -23,27 +23,44 @@ module.exports = function(grunt) {
       file_extension: '.html',
       underscores_to_dashes: true
     });
+    function proc (opts) {
+      // get the files to render, which are declared in the options.path_to_data JSON file
+      var files = ejs_static.get_files(opts);
 
-    // get the files to render, which are declared in the options.path_to_data JSON file
-    var files = ejs_static.get_files(options);
+      // iterate through the files
+      Object.keys(files).forEach(function(key) {
 
-    // iterate through the files
-    Object.keys(files).forEach(function(key) {
+        // get the data specified for the file
+        var file_data = ejs_static.get_data(key, files);
 
-      // get the data specified for the file
-      var file_data = ejs_static.get_data(key, files);
+        // get the layout specified for the file
+        var layout_data = ejs_static.get_layout(key, files, opts);
 
-      // get the layout specified for the file
-      var layout_data = ejs_static.get_layout(key, files, options);
+        // render the file 
+        var rendered_file = ejs_static.render_file(layout_data, file_data);
 
-      // render the file 
-      var rendered_file = ejs_static.render_file(layout_data, file_data);
+        // write the file to the destination directory
+        ejs_static.write_file(key, files, rendered_file, opts);
 
-      // write the file to the destination directory
-      ejs_static.write_file(key, files, rendered_file, options);
-
-    });
-
+      });
+    }
+    if (options.data && options.data.lang && options.data.lang.splice) {
+      //do something funky for me.
+      var l = options.data.lang.length;
+      while (l--) {
+        var i18n = options.data.lang[l];
+        options.data.i18n = i18n;
+        i18n = i18n.split('/')[i18n.split('/').length -1].replace('.json', '');
+        if (i18n !== 'en') {
+          options.dest = options.dir + i18n + '/';
+        } else {
+          options.dest = options.dir;
+        }
+        proc(options);
+      }
+    } else {
+      proc();
+    }
   });
 
 };

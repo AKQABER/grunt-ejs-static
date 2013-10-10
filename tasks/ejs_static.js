@@ -51,11 +51,11 @@ module.exports = function(grunt) {
         var i18n = options.data.lang[l];
         options.data.i18n = i18n;
         i18n = i18n.split('/')[i18n.split('/').length -1].replace('.json', '');
-        if (i18n !== 'en') {
-          options.dest = options.dir + i18n + '/';
-        } else {
+        if (i18n === options.data.defaultlang) {
           options.dest = options.dir;
+          proc(options);
         }
+        options.dest = options.dir + i18n + '/';
         proc(options);
       }
     } else {
